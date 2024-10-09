@@ -1,71 +1,319 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  Image,
+  Animated,
+} from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { Collapsible } from "@/components/Collapsible";
+import { Ionicons } from "@expo/vector-icons";
+import { useRef } from "react";
 
 export default function HomeScreen() {
+  const users = profiles();
+  const medalSize = 60;
+
+  // Header animation parameters
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const podiumSecundaryImageScale = scrollY.interpolate({
+    inputRange: [0, 85],
+    outputRange: [85, 0], // Scale from 1 (original size) to 0 (disappeared)
+    extrapolate: "clamp",
+  });
+  
+  const podiumPrincipalImageScale = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [150, 0], // Scale from 1 to 0
+    extrapolate: "clamp",
+  });
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-      <HelloWave/>
-    </ParallaxScrollView>
+    <View style={[{ flex: 1 }]}>
+      <View style={[styles.headerContainer]}>
+        <Collapsible
+          title="Workout Season 2"
+          Items={[
+            "October TS 2018",
+            "Lifting International",
+            "Workout Season 2",
+            "Workout TC 2019",
+            "Workout TSC 2019",
+          ]}
+        >
+          <View style={[styles.basicPodiumsContainer]}>
+            <Animated.Image
+              style={[
+                styles.firstPodium,
+                {
+                  height: podiumSecundaryImageScale,
+                  width: podiumSecundaryImageScale,
+                },
+              ]}
+              source={{ uri: users.bestThree[1].userFigure }}
+            />
+            <View style={[styles.basicPodiumsContainer, { flex: 0 }]}>
+              <Ionicons name="medal" size={medalSize} color="#C0C0C0" />
+              <ThemedText lightColor="#fff" style={styles.userName}>
+                {users.bestThree[1].userName}
+              </ThemedText>
+              <ThemedText lightColor="#fff" style={styles.userScore}>
+                {users.bestThree[1].userScore}
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={[styles.basicPodiumsContainer]}>
+            <Animated.Image
+              style={[
+                styles.firstPodium,
+                {
+                  height: podiumPrincipalImageScale,
+                  width: podiumPrincipalImageScale,
+                },
+              ]}
+              source={{ uri: users.bestThree[0].userFigure }}
+            />
+            <Ionicons name="medal" size={medalSize} color="#FFD700" />
+            <View style={[styles.basicPodiumsContainer, { flex: 0 }]}>
+              <ThemedText lightColor="#fff" style={styles.userName}>
+                {users.bestThree[0].userName}
+              </ThemedText>
+              <ThemedText lightColor="#fff" style={styles.userScore}>
+                {users.bestThree[0].userScore}
+              </ThemedText>
+            </View>
+          </View>
+
+          <View style={[styles.basicPodiumsContainer]}>
+            <Animated.Image
+              style={[
+                styles.secundaryPodium,
+                {
+                  height: podiumSecundaryImageScale,
+                  width: podiumSecundaryImageScale,
+                },
+              ]}
+              source={{ uri: users.bestThree[2].userFigure }}
+            />
+            <Ionicons name="medal" size={medalSize} color="#CD7F32" />
+            <View style={[styles.basicPodiumsContainer, { flex: 0 }]}>
+              <ThemedText lightColor="#fff" style={styles.userName}>
+                {users.bestThree[2].userName}
+              </ThemedText>
+              <ThemedText lightColor="#fff" style={styles.userScore}>
+                {users.bestThree[2].userScore}
+              </ThemedText>
+            </View>
+          </View>
+        </Collapsible>
+      </View>
+
+      <Animated.ScrollView
+        style={styles.container}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: false }
+        )}
+        scrollEventThrottle={16}
+      >
+        <View>
+          {/* ProfileCard structure */}
+          {users["profiles"].map((user, index) => (
+            <View style={styles.cardContainer}>
+              <View style={styles.positionContainer}>
+                <ThemedText
+                  lightColor="#fff"
+                  style={{ fontWeight: "bold", color: "#8f8f8f" }}
+                >
+                  {index + 1}
+                </ThemedText>
+              </View>
+              <View
+                key={index}
+                style={[
+                  styles.usersContainer,
+                  index < users["profiles"].length - 1 && styles.separatorLine, // Apply line only between cards
+                ]}
+              >
+                <View style={styles.UserBasic}>
+                  {/* Avatar Image */}
+                  <View>
+                    <Image
+                      source={{ uri: user.userFigure }}
+                      style={styles.userImage}
+                    ></Image>
+                  </View>
+
+                  {/* Basic information */}
+                  <View>
+                    <ThemedText lightColor="#fff" style={styles.userName}>
+                      {user.userName}
+                    </ThemedText>
+                    <ThemedText lightColor="#fff" style={styles.userScore}>
+                      {user.userScore}
+                    </ThemedText>
+                  </View>
+                </View>
+
+                {/* Progress status */}
+                <View>
+                  <ThemedText style={[styles.userProgress, { color: "green" }]}>
+                    {user.userProgress}
+                  </ThemedText>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
+const profiles = () => {
+  const myUsers = [];
+
+  // Generate 10 user profiles
+  for (let i = 0; i < 20; i++) {
+    const name = () => {
+      const names = [
+        "John",
+        "Juan",
+        "Jane",
+        "Bob",
+        "Alice",
+        "Mike",
+        "Rober",
+        "April",
+        "Maldonado",
+        "Octavio",
+        "Abraham",
+        "Rojer",
+        "Luis",
+        "Luisa",
+        "Luisito",
+      ];
+      const lastNames = [
+        "Salvador",
+        "Ramirez",
+        "Smit",
+        "Alababama",
+        "Lopez",
+        "Izquierda",
+        "Perez",
+        "Garcia",
+        "Hernandez",
+        "Rodriguez",
+        "Gonzalez",
+        "Martinez",
+        "Diaz",
+        "Torres",
+        "Florentino",
+      ];
+      return `${names[Math.floor(Math.random() * names.length)]} ${
+        lastNames[Math.floor(Math.random() * lastNames.length)]
+      }`;
+    };
+    myUsers.push({
+      userName: name(),
+      userFigure: `https://picsum.photos/id/${Math.floor(
+        Math.random() * 1000
+      )}/200/200`,
+      userScore: Math.floor(Math.random() * 10000),
+      userProgress: Math.floor(Math.random() * 21) - 10, // Random between -10 and 10
+    });
+  }
+
+  // Sort profiles by userScore in descending order
+  myUsers.sort((a, b) => b.userScore - a.userScore);
+
+  // Extract the top 3 profiles
+  const bestThree = myUsers.slice(0, 3);
+
+  return { profiles: myUsers, bestThree };
+};
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#2e2f32",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerContainer: {
+    paddingTop: 40,
+    paddingHorizontal: 20,
+    backgroundColor: "#2e2f32",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  cardContainer: {
+    flex: 1,
+    flexDirection: "row",
+    paddingLeft: 20,
+    backgroundColor: "#202122",
+  },
+  usersContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingRight: 20,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  userScore: {
+    fontSize: 16,
+    color: "#8f8f8f",
+  },
+  userProgress: {
+    fontSize: 16,
+  },
+
+  userImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    marginRight: 15,
+    backgroundColor: "#dcdcdc",
+  },
+  UserBasic: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  separatorLine: {
+    borderBottomWidth: 2, // Line thickness
+    borderBottomColor: "#dcdcdc", // Line color
+    borderColor: "rgba(255,255,255,.1)",
+  },
+  positionContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 20,
+  },
+
+  // Podium styles
+  basicPodiumsContainer: {
+    justifyContent: "flex-end", // Align podiums to the bottom
+    alignItems: "center", // Center the podiums horizontally
+    flex: 1,
+  },
+  firstPodium: {
+    width: 150,
+    height: 150,
+    borderRadius: 100, // Make the image circular
+    backgroundColor: "#dcdcdc",
+    elevation: 10,
+    marginBottom: -15,
+  },
+  secundaryPodium: {
+    width: 85,
+    height: 85,
+    borderRadius: 50, // Make the image circular
+    backgroundColor: "#dcdcdc",
+    elevation: 10,
+    marginBottom: -15,
   },
 });
