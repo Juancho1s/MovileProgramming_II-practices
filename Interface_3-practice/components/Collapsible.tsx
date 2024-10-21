@@ -1,94 +1,120 @@
-// import  from "@expo/vector-icons/Ionicons";
 import { Ionicons } from "@expo/vector-icons";
 import { PropsWithChildren, useState } from "react";
 import {
-  ScrollView,
   StyleSheet,
+  Text,
   TouchableOpacity,
-  useColorScheme,
+  View,
+  TouchableWithoutFeedback,
+  Modal,
 } from "react-native";
-
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
-import { View } from "lucide-react-native";
 
 export function Collapsible({
-  children,
   title,
   Items,
 }: PropsWithChildren & { title: string } & { Items: Array<string> }) {
   const [isOpen, setIsOpen] = useState(false);
-  const theme = useColorScheme() ?? "light";
 
   return (
-    <ThemedView style={styles.header}>
-      {isOpen ? (
+    <View style={styles.header}>
+      {isOpen === false && (
         <TouchableOpacity
-          onPress={() => setIsOpen((value) => !value)}
+          style={styles.heading}
+          onPress={() => setIsOpen(true)}
           activeOpacity={0.8}
-          style={{flex: 1}}
         >
-          {Items.map((item, index) => (
-            <ThemedText
-              key={index}
-              style={[
-                styles.title,
-                { color: item == title ? "#fff" : "#8f8f8f" },
-                index < Items.length - 1 && styles.separatorLine, // Apply line only between cards
-              ]}
-            >
-              {item}
-            </ThemedText>
-          ))}
-          <ThemedView
-            style={[
-              {
-                justifyContent: "center",
-                alignItems: "center",
-                alignContent: "center",
-                backgroundColor: "",
-              },
-            ]}
-          >
-            <Ionicons
-              name={isOpen ? "chevron-up" : "chevron-up-outline"}
-              size={40}
-              color={theme === "light" ? Colors.light.icon : Colors.dark.icon}
-            />
-          </ThemedView>
+          <ThemedText type="defaultSemiBold" style={styles.title}>
+            {title}
+          </ThemedText>
+          <Ionicons name={"chevron-down"} size={26} color={Colors.light.icon} />
         </TouchableOpacity>
-      ) : (
-        <ThemedView style={styles.collapsibleContainer}>
-          {/* Collapsible element */}
-          <TouchableOpacity
-            style={styles.heading}
-            onPress={() => setIsOpen((value) => !value)}
-            activeOpacity={0.8}
-          >
-            <ThemedText type="defaultSemiBold" style={styles.title}>
-              {title}
-            </ThemedText>
-            <Ionicons
-              name={"chevron-down"}
-              size={26}
-              color={theme === "light" ? Colors.light.icon : Colors.dark.icon}
-            />
-          </TouchableOpacity>
-
-          {/* Podium elements */}
-          <ThemedView style={styles.podium}>{children}</ThemedView>
-        </ThemedView>
       )}
-    </ThemedView>
+
+      {/** Modal for full-screen overlay when open **/}
+      <Modal visible={isOpen} transparent animationType="fade">
+        <TouchableWithoutFeedback onPress={() => setIsOpen(false)}>
+          <View style={styles.overlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.collapsibleContent}>
+                {Items.map((item, index) => (
+                  <TouchableOpacity
+                    style={[styles.section]}
+                    key={`section-${index}`}
+                    onPress={() => setIsOpen(false)}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        styles.sectionText,
+                        { color: item === title ? "#fff" : "#8f8f8f" },
+                      ]}
+                    >
+                      {item}
+                    </Text>
+                    {RandPosition(item === title)}
+                  </TouchableOpacity>
+                ))}
+                <View style={styles.chevron}>
+                  <Ionicons
+                    onPress={() => setIsOpen(false)}
+                    name={"chevron-up"}
+                    size={50}
+                    color={Colors.light.icon}
+                  />
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </View>
   );
 }
 
+export function RandPosition(isSelected: boolean) {
+  const randomPosition = Math.floor(Math.random() * 10) + 1;
+  const medalSize = 36;
+
+  switch (randomPosition) {
+    case 1:
+      return <Ionicons name="medal" size={medalSize} color="#FFD700" />;
+    case 2:
+      return <Ionicons name="medal" size={medalSize} color="#C0C0C0" />;
+    case 3:
+      return <Ionicons name="medal" size={medalSize} color="#CD7F32" />;
+    default:
+      return (
+        <Text
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 18,
+            fontWeight: "900",
+            color: isSelected ? "#fff" : "#8f8f8f",
+          }}
+        >
+          {randomPosition}
+        </Text>
+      );
+  }
+}
+
 const styles = StyleSheet.create({
-  //Collabsible container
-  collapsibleContainer: {
+  // Full-screen overlay
+  overlay: {
     flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Dimmed background
+    justifyContent: "flex-start",
+  },
+
+  // Collapsible content style
+  collapsibleContent: {
+    gap: 30,
+    width: "100%",
     backgroundColor: Colors.dark.background,
+    padding: 20,
   },
 
   heading: {
@@ -96,15 +122,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Podium Styling
-  podium: {
-    flexDirection: "row",
-    backgroundColor: Colors.dark.background,
-    paddingVertical: 20,
-  },
-
   header: {
-    flexDirection: "row",
+    marginBottom: 20,
     backgroundColor: Colors.dark.background,
   },
   title: {
@@ -113,15 +132,17 @@ const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  //Sections  selection
-  sections: {
-    flex: 1,
-    justifyContent: "flex-start",
+  section: { flexDirection: "row", justifyContent: "space-between" },
+  sectionText: {
+    justifyContent: "center",
+    alignItems: "center",
     fontSize: 25,
-    fontWeight: "bold",
-    color: "#8f8f8f",
+    fontWeight: "900",
   },
-  separatorLine: {
-    height: 50,
+
+  chevron: {
+    justifyContent: "center",
+    alignContent: "center",
+    alignItems: "center",
   },
 });

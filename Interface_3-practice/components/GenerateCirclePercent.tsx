@@ -5,13 +5,15 @@ import Svg, { Circle } from "react-native-svg";
 // Wrap the Circle in Animated.createAnimatedComponent to make it animatable
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface circleProps {}
+interface circleProps {
+  percentage: number; // Percentage value
+  radius: number;
+  strokeWidth: number;
+  duration: number; // Increased duration for smoother animation
 
-export default function Chat() {
-  const percentage = 97; // Percentage value
-  const radius = 50;
-  const strokeWidth = 10;
-  const duration = 3000; // Increased duration for smoother animation
+}
+
+export default function CirclePercentage({percentage, radius, strokeWidth, duration}: circleProps) {
 
   const circumference = 2 * Math.PI * radius;
   const halfCircle = radius + strokeWidth;
@@ -63,7 +65,7 @@ export default function Chat() {
       
       {/* Percentage Text */}
       <View style={styles.textContainer}>
-        <Text style={styles.percentageText}>{`${percentage}%`}</Text>
+        <Text style={[styles.percentageText, {fontSize: radius / 1.5}]}>{`${percentage}`}</Text>
       </View>
     </View>
   );
