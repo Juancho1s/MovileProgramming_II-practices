@@ -194,7 +194,7 @@ export function ProfileView({
             <Text style={[styles.fontHiuge]}>11 476</Text>
           </View>
 
-          {/* Basic stats */}
+          {/* Basic stats random change*/}
           <View
             style={[
               {
